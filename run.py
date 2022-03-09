@@ -1,16 +1,20 @@
+# Sorry for the trashed main file
+
 import pygame
 from pygame.locals import *
 from random import choice
 
-from ballclass import Ball
-from rocketclass import Rocket
-
+from objectclasses.ballclass import Ball
+from objectclasses.racketclass import Racket
 
 FPS = 120
-# red_rocket = blue_rocket = ball = None
+RED = (255, 38, 54)
+BLUE = (66, 133, 180)
+YELLOW = (255, 255, 0)
 
 
 def change_text_brightness(brightness, color):
+    # increase the brightness until the desired color is obtained
     r, g, b = color[0], color[1], color[2]
     if brightness < r:
         cr = brightness
@@ -43,7 +47,8 @@ def draw_menu(screen, brightness):
     screen.blit(text, (text_x, text_y))
 
 
-def draw_game(screen, red_score, blue_score):
+def draw_game_screen(screen, score1, score2):
+    # there is no special class for the game screen
     screen.fill((150, 150, 150))
     pygame.draw.line(screen, (255, 255, 255),
                      (screen.get_size()[0] // 2, 0),
@@ -56,7 +61,7 @@ def draw_game(screen, red_score, blue_score):
                      (0, screen.get_size()[1] - 115, screen.get_size()[0], 115),
                      15)
     font = pygame.font.Font(None, 100)
-    text = font.render(str(red_score) + "  -  " + str(blue_score),
+    text = font.render(str(score1) + "  -  " + str(score2),
                        True, (0, 0, 0))
     text_x = width // 2 - text.get_width() // 2
     text_y = screen.get_size()[1] - 90
@@ -65,14 +70,14 @@ def draw_game(screen, red_score, blue_score):
 
 def start_new_round():
     global ball
-    if choice([True, False]):
-        ball = Ball((screen.get_size()[0] // 2,
-                     (screen.get_size()[1] - 115) // 2),
-                    20, (255, 255, 0), (5, 0))
+    if choice([True, False]):  # the ball moves to the left or right side
+        side = 1
     else:
-        ball = Ball((screen.get_size()[0] // 2,
-                     (screen.get_size()[1] - 115) // 2),
-                    20, (255, 255, 0), (-5, 0))
+        side = -1
+    # place the ball in the center of the playing field
+    ball = Ball((screen.get_size()[0] // 2,
+                 (screen.get_size()[1] - 115) // 2),
+                20, YELLOW, direction=(side * 5, 0))
 
 
 if __name__ == '__main__':
@@ -81,16 +86,14 @@ if __name__ == '__main__':
     size = width, height = 1300, 700
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
-    running = True
-    in_menu = True
-    red_score = 0
-    blue_score = 0
-    timecount = 50
-    red_rocket = Rocket((13, (screen.get_size()[1] - 115) // 2 - 115),
-                        (30, 230), (255, 38, 54))
-    blue_rocket = Rocket((screen.get_size()[0] - 45,
+    running = in_menu = True
+    red_score = blue_score = 0
+    timecount = 50  # a simple time counter to change brightness of the menu
+    red_racket = Racket((13, (screen.get_size()[1] - 115) // 2 - 115),
+                        (30, 230), RED)
+    blue_racket = Racket((screen.get_size()[0] - 45,
                           (screen.get_size()[1] - 115) // 2 - 115),
-                         (30, 230), (66, 133, 180))
+                         (30, 230), BLUE)
     start_new_round()
     pygame.display.flip()
     while running:
@@ -101,27 +104,27 @@ if __name__ == '__main__':
                 if event.key == pygame.K_SPACE and in_menu:
                     in_menu = False
         if pygame.key.get_pressed()[K_w] and not in_menu:
-            red_rocket.move('up', screen)
+            red_racket.move('u', screen)
         if pygame.key.get_pressed()[K_s] and not in_menu:
-            red_rocket.move('down', screen)
+            red_racket.move('d', screen)
         if pygame.key.get_pressed()[K_UP] and not in_menu:
-            blue_rocket.move('up', screen)
+            blue_racket.move('u', screen)
         if pygame.key.get_pressed()[K_DOWN] and not in_menu:
-            blue_rocket.move('down', screen)
+            blue_racket.move('d', screen)
         if in_menu:
             draw_menu(screen, timecount)
             timecount += 1
         else:
-            draw_game(screen, red_score, blue_score)
-            red_rocket.render(screen)
-            blue_rocket.render(screen)
-            if ball.check_left_rocket_collision(red_rocket) == 'goal':
+            draw_game_screen(screen, red_score, blue_score)
+            red_racket.render(screen, RED)
+            blue_racket.render(screen, BLUE)
+            if ball.touch_left_racket(red_racket) == 'goal':
                 blue_score += 1
                 start_new_round()
-            if ball.check_right_rocket_collision(blue_rocket) == 'goal':
+            if ball.touch_right_racket(blue_racket) == 'goal':
                 red_score += 1
                 start_new_round()
-            ball.check_wall_collision(screen)
+            ball.touch_wall(screen)
             ball.move(screen)
         clock.tick(FPS)
         pygame.display.flip()
