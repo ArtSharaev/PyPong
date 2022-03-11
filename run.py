@@ -11,6 +11,7 @@ FPS = 120
 RED = (255, 38, 54)
 BLUE = (66, 133, 180)
 YELLOW = (255, 255, 0)
+WHITE = (255, 255, 255)
 
 
 def change_text_brightness(brightness, color):
@@ -31,7 +32,25 @@ def change_text_brightness(brightness, color):
     return cr, cg, cb
 
 
-def draw_menu(screen, brightness):
+def draw_menu_screen(screen, menuarray):
+    screen.fill((50, 50, 50))
+    font = pygame.font.Font('fonts/wide_latin.ttf', 80)
+    text = font.render("PyPong", True, YELLOW)
+    text_x = width // 2 - text.get_width() // 2
+    text_y = height // 10
+    screen.blit(text, (text_x, text_y))
+    font = pygame.font.Font(None, 70)
+    text = font.render("PLAY", True, menuarray[0])
+    text_x = width // 6 * 2 - text.get_width() // 2
+    text_y = height // 2 - text.get_height() // 2 + 40
+    screen.blit(text, (text_x, text_y))
+    text = font.render("SETTINGS", True, menuarray[1])
+    text_x = width // 6 * 4 - text.get_width() // 2
+    text_y = height // 2 - text.get_height() // 2 + 40
+    screen.blit(text, (text_x, text_y))
+
+
+def draw_start_screen(screen, brightness):
     screen.fill((50, 50, 50))
     font = pygame.font.Font('fonts/wide_latin.ttf', 100)
     text = font.render("PyPong", True,
@@ -40,7 +59,7 @@ def draw_menu(screen, brightness):
     text_y = height // 2 - text.get_height() // 2 - 50
     screen.blit(text, (text_x, text_y))
     font = pygame.font.Font(None, 50)
-    text = font.render("Press space key to start!", True,
+    text = font.render("Press enter to start!", True,
                        change_text_brightness(brightness, (255, 255, 50)))
     text_x = width // 2 - text.get_width() // 2
     text_y = height // 2 - text.get_height() // 2 + 40
@@ -86,7 +105,10 @@ if __name__ == '__main__':
     size = width, height = 1300, 700
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
-    running = in_menu = True
+    running = in_start_screen = True
+    in_menu_screen = in_game_screen = False
+    in_menu_screen = True
+    in_start_screen = False
     red_score = blue_score = 0
     timecount = 50  # a simple time counter to change brightness of the menu
     red_racket = Racket((13, (screen.get_size()[1] - 115) // 2 - 115),
@@ -101,20 +123,26 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and in_menu:
-                    in_menu = False
-        if pygame.key.get_pressed()[K_w] and not in_menu:
+                if event.key == pygame.K_RETURN and in_start_screen:
+                    in_start_screen = False
+                    in_menu_screen = True
+                elif event.key == pygame.K_RETURN and in_menu_screen:
+                    in_menu_screen = False
+                    in_game_screen = True
+        if pygame.key.get_pressed()[K_w] and in_game_screen:
             red_racket.move('u', screen)
-        if pygame.key.get_pressed()[K_s] and not in_menu:
+        if pygame.key.get_pressed()[K_s] and in_game_screen:
             red_racket.move('d', screen)
-        if pygame.key.get_pressed()[K_UP] and not in_menu:
+        if pygame.key.get_pressed()[K_UP] and in_game_screen:
             blue_racket.move('u', screen)
-        if pygame.key.get_pressed()[K_DOWN] and not in_menu:
+        if pygame.key.get_pressed()[K_DOWN] and in_game_screen:
             blue_racket.move('d', screen)
-        if in_menu:
-            draw_menu(screen, timecount)
+        if in_start_screen:
+            draw_start_screen(screen, timecount)
             timecount += 1
-        else:
+        elif in_menu_screen:
+            draw_menu_screen(screen, [YELLOW, WHITE])
+        elif in_game_screen:
             draw_game_screen(screen, red_score, blue_score)
             red_racket.render(screen, RED)
             blue_racket.render(screen, BLUE)

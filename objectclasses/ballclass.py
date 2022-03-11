@@ -27,6 +27,7 @@ class Ball:
         rs = rocketclass.size[1]
         x = self.direction[0]
         y = self.direction[1]
+        multiplier = 1
         if (self.coords[0] <= rocketclass.coords[0] + self.radius +
                 rocketclass.size[0]):  # behind the racket
             if (c >= rc - r) and (c <= rc + rs + r):  # falling in a racket
@@ -64,6 +65,7 @@ class Ball:
         rs = rocketclass.size[1]
         x = self.direction[0]
         y = self.direction[1]
+        multiplier = 1
         if self.coords[0] >= rocketclass.coords[0] - self.radius:  # behind the racket
             if (c >= rc - r) and (c <= rc + rs + r):  # falling in a racket
                 if (x >= 0) and (y >= 0):  # the ball moves from top to bottom
